@@ -1,0 +1,56 @@
+#!/usr/bin/perl
+
+#
+# GLOBALS AND PRAGMAS
+#
+use strict;
+use Cwd;
+my %vmhash;
+my $sdir = getcwd;
+
+#
+# SUBROUTINE DEFINITIONS
+#
+sub ClobberVM {
+  my ($id, $path) = @_;
+  chdir("$path") or die "$!";
+  #my $foo = getcwd;
+  #chomp($foo);
+  print "We are now in dir: " . getcwd;
+  system "vagrant destroy -f"
+}
+
+#
+# ELABORATION
+#
+print "Global VM Killer: This tools clears ALL VMs from a system\n";
+my @buff = `vagrant global-status`;
+print @buff;
+chomp(@buff);
+print "\nprocessing...\n";
+for (my $pos = 2; $pos < $#buff; ++$pos) {
+  last if $buff[$pos] =~ /^\s*$/;
+  chomp($buff[$pos]);
+  if ($buff[$pos] =~ /^There are no/) {
+    print "NO VMS FOUND\n";
+    last;
+  }
+
+  my ($id, $path) = ( $buff[$pos] =~ /^([A-Za-z0-9]+)(?:(?:\s+\S+){3} +)(.*)$/ );
+  $path =~ s/^(.*?)\s*$/\1/;
+
+  ClobberVM($id, $path);
+}
+__END__
+https://artifactory.ec2.local/resmed-remote-repo/resmed/hi/ngcs/karaf/monaco/3.99.0-develop-1101/monaco-3.99.0-develop-1101.gz
+  #my ($id, $path) = $buff[$pos] =~ /^(\d+)((\s+\S+){3})(.*)$/;
+  use Cwd;
+  my $foo = getcwd;
+  print "\n$foo\n";
+  chdir("C:/Users");
+  $foo = getcwd;
+  print "\n$foo\n";
+  my $dname = "C:/Go";
+  chdir("$dname");
+  $foo = getcwd;
+  print "\n$foo\n";
