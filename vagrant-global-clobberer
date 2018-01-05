@@ -5,8 +5,12 @@
 #
 use strict;
 use Cwd;
+$| = 1;
 my %vmhash;
 my $sdir = getcwd;
+
+print "fageddaboutitn";
+exit;
 
 #
 # SUBROUTINE DEFINITIONS
@@ -17,7 +21,13 @@ sub ClobberVM {
   #my $foo = getcwd;
   #chomp($foo);
   print "We are now in dir: " . getcwd;
-  system "vagrant destroy -f"
+  open(COMF, "vagrant destroy -f|") 
+    or die "Opening pipe to vagrant command failed: $!";
+  print "Return Code: $!\n";
+  while (my $line = <COMF>) {
+    print $line;
+  }
+  print "Now Return Code: $!\n";
 }
 
 #
