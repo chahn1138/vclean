@@ -9,25 +9,44 @@ $| = 1;
 my %vmhash;
 my $sdir = getcwd;
 
-print "fageddaboutitn";
-exit;
-
 #
 # SUBROUTINE DEFINITIONS
 #
 sub ClobberVM {
   my ($id, $path) = @_;
   chdir("$path") or die "$!";
-  #my $foo = getcwd;
-  #chomp($foo);
-  print "We are now in dir: " . getcwd;
-  open(COMF, "vagrant destroy -f|") 
+  print "Operating in dir: " . getcwd . "\n";
+
+  open(COMF, "vagrant destroy -f 2>&1|") 
     or die "Opening pipe to vagrant command failed: $!";
-  print "Return Code: $!\n";
-  while (my $line = <COMF>) {
-    print $line;
+
+  if ($? != 0) {
+    print "Error when opening pipe: $!\n";
+    print "\nMoving on...\n";
+    close(COMF);
+    return;
   }
-  print "Now Return Code: $!\n";
+  print "Reading from PIPE....\n";
+  PIPE: while (my $line = <COMF>) {
+    chomp($line);
+    print "PIPE: " . $line . "\n";
+    if ($line =~ /^Your UID is: (\d+)/) {
+      my $uid = $1;
+      close(COMF);
+      print "\nWRONG USER!  Enforing uid = $uid\n";
+      unlink("./.vagrant/machines/default/virtualbox/creator_uid");
+      open(OUTF, ">./.vagrant/machines/default/virtualbox/creator_uid")
+        or die "Opening the creator_uid file failed: $!";
+      print OUTF $uid;
+      close(OUTF);
+      print "\ncontrol file modified!\n\nRe-running the destroy...\n";
+      system("vagrant destroy -f");
+      last PIPE;
+    } elsif ($line =~ /^A Vagrant environment or target machine/) {
+        print "FATAL: no Vagrantfile found....moving on to next target...\n";
+        last PIPE;
+    }
+  }
 }
 
 #
@@ -52,15 +71,3 @@ for (my $pos = 2; $pos < $#buff; ++$pos) {
   ClobberVM($id, $path);
 }
 __END__
-https://artifactory.ec2.local/resmed-remote-repo/resmed/hi/ngcs/karaf/monaco/3.99.0-develop-1101/monaco-3.99.0-develop-1101.gz
-  #my ($id, $path) = $buff[$pos] =~ /^(\d+)((\s+\S+){3})(.*)$/;
-  use Cwd;
-  my $foo = getcwd;
-  print "\n$foo\n";
-  chdir("C:/Users");
-  $foo = getcwd;
-  print "\n$foo\n";
-  my $dname = "C:/Go";
-  chdir("$dname");
-  $foo = getcwd;
-  print "\n$foo\n";
